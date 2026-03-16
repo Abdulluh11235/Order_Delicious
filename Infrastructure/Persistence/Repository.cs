@@ -1,11 +1,12 @@
 using System.Linq.Expressions;
+using Domain.Interfaces;
 using Domain.Interfaces.Repository;
 using Infrastructure.Persistence.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Persistence;
 
-public abstract class Repository<T>:IRepository<T> where T :class
+public abstract class Repository<T>:IRepository<T> where T :class,IIdentifiable
 {
     protected readonly AppDbContext Db;
     protected readonly DbSet<T> DbSet;
@@ -29,7 +30,7 @@ public abstract class Repository<T>:IRepository<T> where T :class
 
     public virtual async Task<T?> GetFirstOrDefault(Expression<Func<T, bool>> condition)
     {
-        return await DbSet.FirstOrDefaultAsync(condition);
+        return await DbSet.FirstOrDefaultAsync(condition);  
     }
 
 
@@ -47,14 +48,13 @@ public abstract class Repository<T>:IRepository<T> where T :class
     {
         DbSet.Update(entity);
     }
-    public void RemoveRange(IEnumerable<T> entities)
+    public async Task RemoveRange(IEnumerable<int> ids)
     {
-        DbSet.RemoveRange(entities);   
+        await DbSet.Where(e => ids.Contains(e.Id))
+            .ExecuteDeleteAsync();
     }
-
     public void Remove(T entity)
     {
         DbSet.Remove(entity);
-        return;
     }
 }

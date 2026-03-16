@@ -22,6 +22,21 @@ namespace Infrastructure.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("CategoryItem", b =>
+                {
+                    b.Property<int>("CategoriesId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ItemsId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("CategoriesId", "ItemsId");
+
+                    b.HasIndex("ItemsId");
+
+                    b.ToTable("CategoryItem");
+                });
+
             modelBuilder.Entity("Domain.Entities.Category", b =>
                 {
                     b.Property<int>("Id")
@@ -30,16 +45,17 @@ namespace Infrastructure.Persistence.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("ItemId")
+                    b.Property<int>("ImageId")
                         .HasColumnType("integer");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ItemId");
+                    b.HasIndex("ImageId");
 
                     b.ToTable("Categories");
                 });
@@ -54,18 +70,21 @@ namespace Infrastructure.Persistence.Migrations
 
                     b.Property<string>("AltText")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
 
                     b.Property<int?>("ItemId")
                         .HasColumnType("integer");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
 
                     b.Property<string>("Url")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.HasKey("Id");
 
@@ -86,7 +105,8 @@ namespace Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
-                        .HasColumnType("text");
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.Property<decimal>("DiscountRate")
                         .HasColumnType("numeric");
@@ -96,7 +116,8 @@ namespace Infrastructure.Persistence.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("numeric");
@@ -109,11 +130,30 @@ namespace Infrastructure.Persistence.Migrations
                     b.ToTable("Items");
                 });
 
+            modelBuilder.Entity("CategoryItem", b =>
+                {
+                    b.HasOne("Domain.Entities.Category", null)
+                        .WithMany()
+                        .HasForeignKey("CategoriesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.Item", null)
+                        .WithMany()
+                        .HasForeignKey("ItemsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Domain.Entities.Category", b =>
                 {
-                    b.HasOne("Domain.Entities.Item", null)
-                        .WithMany("Categories")
-                        .HasForeignKey("ItemId");
+                    b.HasOne("Domain.Entities.Image", "Image")
+                        .WithMany()
+                        .HasForeignKey("ImageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Image");
                 });
 
             modelBuilder.Entity("Domain.Entities.Image", b =>
@@ -125,8 +165,6 @@ namespace Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Domain.Entities.Item", b =>
                 {
-                    b.Navigation("Categories");
-
                     b.Navigation("Images");
                 });
 #pragma warning restore 612, 618

@@ -8,7 +8,10 @@ public class Result<T>
 
     public Result(bool isSuccess=true,string? errorMessage=null)
     {
-        isSuccess = isSuccess;
+        IsSuccess = isSuccess;
         ErrorMessage = errorMessage;
     }
+
+    private const string NotFoundErrorMessage = "Not found";
+    public static string NotFoundError => NotFoundErrorMessage;
 }

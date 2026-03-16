@@ -1,4 +1,5 @@
 using Application.Commands;
+using Application.DTOs;
 using AutoMapper;
 using Domain.Entities;
 
@@ -9,5 +10,7 @@ public class CategoryProfile:Profile
     public CategoryProfile()
     {
         CreateMap<CreateCategory, Category>();
+        CreateMap<UpdateCategory, Category>();
+        CreateMap<Category, CategoryDto>();
     }
 }

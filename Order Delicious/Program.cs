@@ -1,5 +1,10 @@
 using Application.Mappings;
-using Infrastructure;
+using Application.Services;
+using Application.Services.Interfaces;
+using AutoMapper;
+using Domain.Interfaces;
+using Domain.Interfaces.Repository;
+using Infrastructure.Persistence;
 using Infrastructure.Persistence.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,9 +19,25 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AppDbContext>(
     options => options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
 
-#region Application Layer
-builder.Services.AddAutoMapper(typeof(CategoryProfile));
-//builder.Services.AddScoped<Icategory>();
+#region  Infrastructure
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<IItemRepository,ItemRepository>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+#endregion
+#region Application 
+    
+builder.Services.AddSingleton<IMapper>(provider =>
+{
+    var loggerFactory = provider.GetRequiredService<ILoggerFactory>();
+
+    var config = new MapperConfiguration(cfg =>
+    {
+        cfg.AddMaps(typeof(CategoryProfile).Assembly);
+    }, loggerFactory);
+
+    return config.CreateMapper();
+});
+    builder.Services.AddScoped<ICategoryService,CategoryService>();
 #endregion
 
 

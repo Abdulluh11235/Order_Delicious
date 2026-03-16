@@ -9,6 +9,7 @@ public interface IRepository<T> where T : class
     Task<T?> GetFirstOrDefault(Expression<Func<T,bool>> condition);
     public Task<IEnumerable<T>> FindEntityPaged(Expression<Func<T, bool>> predicate, int pageNumber, int pageSize);
     public Task<int> Count();
-    void RemoveRange(IEnumerable<T> entities);
+    public void Update(T entity);
+    Task RemoveRange(IEnumerable<int> ids);
     void Remove(T entity);
 }   

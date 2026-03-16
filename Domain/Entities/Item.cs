@@ -4,7 +4,7 @@ using Domain.Interfaces;
 
 namespace Domain.Entities;
 
-public class Item:TimeTrackable,IDiscountable, IAvailable
+public class Item:TimeTrackable,IDiscountable, IAvailable,IIdentifiable
 {
     [MinLength(1)]
     public int Id { get; set; }
