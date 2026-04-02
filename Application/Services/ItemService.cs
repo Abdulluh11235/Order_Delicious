@@ -67,6 +67,8 @@ public class ItemService:IItemService
             FindEntities(c => updateItem.CategoryIds.Contains(c.Id), cancellationToken);
          if(item.Categories.Count == 0) return new Result<int>(false,"No category provided");
          CopyValues(item, updateItem);
+        await _unitOfWork.Images.RemoveRange(item.Images.Select(i=>i.Id));
+         item.Images = UpdateImages(updateItem.Images);
          _unitOfWork.Items.Update(item);
          await _unitOfWork.SaveChanges(cancellationToken);
          return new Result<int>();
@@ -79,9 +81,20 @@ public class ItemService:IItemService
         item.Price = updateItem.Price;
         item.DiscountRate = updateItem.DiscountRate;
         item.IsAvailable = updateItem.IsAvailable;
-        item.Images = _mapper.Map<ICollection<Image>>(updateItem.Images);
     }
-
+    private ICollection<Image> UpdateImages(IEnumerable<UpdateImage> uimgs)
+    {
+        ICollection<Image> newImages=new List<Image>(uimgs.Count());
+        foreach (var uimg in uimgs)
+        {
+            var img = new Image();
+            img.Title = uimg.Title;
+            img.AltText = uimg.AltText;
+            img.Url = uimg.Url;   
+            newImages.Add(img);
+        }
+        return newImages;
+    }
     public async Task<Result<int>> RemoveRange(IEnumerable<int> ids,
         CancellationToken cancellationToken = default)
     {
@@ -92,6 +105,8 @@ public class ItemService:IItemService
     }
    public async Task<Result<int>> RemoveById(int id, CancellationToken cancellationToken = default)
    {
+       if (id  <= 0) return new Result<int>(false,"Id must be greater than 0");
+
        var item = await _unitOfWork.Items.GetFirstOrDefault(it => it.Id == id);
        if (item == null) return new Result<int>(false,Result<int>.NotFoundError);
        _unitOfWork.Items.Remove(item);

@@ -10,7 +10,7 @@ public record UpdateItem(
     [Range(0, double.MaxValue)]
     decimal Price ,
     [MinLength(1)]
-    IEnumerable<CreateImage> Images,
+    IEnumerable<UpdateImage> Images,
     [MinLength(1)]
     IEnumerable<int> CategoryIds,
     [Range(0,1)]

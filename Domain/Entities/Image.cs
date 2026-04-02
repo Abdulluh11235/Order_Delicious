@@ -1,8 +1,9 @@
 using System.ComponentModel.DataAnnotations;
+using Domain.Interfaces;
 
 namespace Domain.Entities;
 
-public class Image
+public class Image:IIdentifiable
 {
     [MinLength(1)]
     public int Id { get; set; }

@@ -68,5 +68,56 @@ namespace Order_Delicious.Controllers
             if(!res.IsSuccess) return BadRequest();
             return Ok(res.Value);
         }
+        [HttpPut("{id:int}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> Update(int id,UpdateItem updateItem,CancellationToken cancellationToken)
+        {
+            var result = await  _itemService.Update(id,updateItem, cancellationToken);
+            if(!result.IsSuccess && result.ErrorMessage==Result<int>.NotFoundError) 
+                return NotFound();
+            if (!result.IsSuccess) return BadRequest(result.ErrorMessage);
+            return Ok();
+        }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="ids"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        [HttpDelete]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> RemoveRange([FromBody] IEnumerable<int> ids,
+            CancellationToken cancellationToken)
+        {
+            var result = await _itemService.RemoveRange(ids, cancellationToken);
+            if(!result.IsSuccess) return BadRequest(result.ErrorMessage);
+            return NoContent();
+        }
+        
+        /// <summary>
+        /// Removing Item By id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        [HttpDelete("{id:int}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> RemoveById( int id,
+            CancellationToken cancellationToken)
+        {
+            var result = await _itemService.RemoveById(id, cancellationToken);
+            if(!result.IsSuccess) return BadRequest(result.ErrorMessage);
+            return NoContent();
+        }
+
+        
     }
 }

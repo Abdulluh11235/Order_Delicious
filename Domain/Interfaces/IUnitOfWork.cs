@@ -6,6 +6,6 @@ public interface IUnitOfWork
 {
    ICategoryRepository Categories { get; set; }
    IItemRepository Items { get; set; }
-   
+   IImageRepository Images { get; set; }
    Task SaveChanges(CancellationToken cancellationToken);
 }
