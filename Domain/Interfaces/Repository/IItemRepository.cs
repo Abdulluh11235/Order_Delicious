@@ -1,6 +1,8 @@
+using Domain.Entities;
+
 namespace Domain.Interfaces.Repository;
 
-public interface IItemRepository
+public interface IItemRepository:IRepository<Item>
 {
     
 }

@@ -38,6 +38,7 @@ builder.Services.AddSingleton<IMapper>(provider =>
     return config.CreateMapper();
 });
     builder.Services.AddScoped<ICategoryService,CategoryService>();
+    builder.Services.AddScoped<IItemService,ItemService>();
 #endregion
 
 

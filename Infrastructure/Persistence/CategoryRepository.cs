@@ -14,21 +14,21 @@ public class CategoryRepository:Repository<Category>,ICategoryRepository
     {
         
     }
-    public override async Task<IEnumerable<Category>> GetEntityPaged(int pageNumber, int pageSize)
+    public override async Task<IEnumerable<Category>> GetEntityPaged(int pageNumber, int pageSize,CancellationToken cancellationToken)
     { 
         int offset = (pageNumber - 1) * pageSize;
         var dbSetImageIncluded = DbSetIncludeImage();
-        return await dbSetImageIncluded.Skip(offset).Take(pageSize).ToListAsync();
+        return await dbSetImageIncluded.Skip(offset).Take(pageSize).ToListAsync(cancellationToken);
     }
     public override async Task<Category?> GetFirstOrDefault(Expression<Func<Category, bool>> condition)
     {
         var dbSetImageIncluded = DbSetIncludeImage();
         return await dbSetImageIncluded.FirstOrDefaultAsync(condition);
     }
-    public override async Task<IEnumerable<Category>> FindEntityPaged(Expression<Func<Category, bool>> predicate, int pageNumber, int pageSize)
+    public override async Task<IEnumerable<Category>> FindEntities(Expression<Func<Category, bool>> predicate,CancellationToken cancellationToken)
     {
         var dbSetImageIncluded = DbSetIncludeImage();
-        return await dbSetImageIncluded.Where(predicate).Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
+        return await dbSetImageIncluded.Where(predicate).ToListAsync(cancellationToken);
     }
 
     

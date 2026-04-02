@@ -12,6 +12,5 @@ public class ImageProfile:Profile
         CreateMap<CreateImage, Image>();
         CreateMap<UpdateImage, Image>();
          CreateMap<Image, ImageDto>();
-      //   CreateMap<ImageDto, Image>();
     }
 }

@@ -35,7 +35,7 @@ public class CategoryService : ICategoryService
        if (pageSize < 1) return 
            new Result<CategoryPageDto>(false,"Page Size Must Be Greater Than Zero");
        
-       var page = await  _unitOfWork.Categories.GetEntityPaged(pageNumber, pageSize);
+       var page = await  _unitOfWork.Categories.GetEntityPaged(pageNumber, pageSize,cancellationToken);
            var categoriesDto = _mapper.Map<List<CategoryDto>>(page);
        
        var count = await _unitOfWork.Categories.Count();
@@ -52,14 +52,6 @@ public class CategoryService : ICategoryService
        return new Result<CategoryDto?>(true){ Value = _mapper.Map<CategoryDto>(val) };
    }
    
-
-   public async Task<Result<IEnumerable<CategoryDto>>> FindCategoryPaged(Expression<Func<Category, bool>> predicate,
-       int pageNumber,int pageSize,CancellationToken cancellationToken=default)
-   {
-        var categories = await _unitOfWork.Categories.FindEntityPaged(predicate,pageNumber, pageSize);
-       return new Result<IEnumerable<CategoryDto>>(true) {Value =_mapper.Map<List<CategoryDto>>(categories) };
-   }
-
    public async Task<Result<int>> Update(int id,UpdateCategory updateCategory, CancellationToken cancellationToken = default)
    {
        if(id <= 0) return new Result<int>(false, "Id Must Be Greater Than Zero");

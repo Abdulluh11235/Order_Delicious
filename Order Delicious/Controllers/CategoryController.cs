@@ -5,14 +5,15 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Order_Delicious.Controllers
 {
-    [Route("api/v1/[controller]")]
+    [Route("api/v1/categories")]
     [ApiController]
     public class CategoryController : ControllerBase
     {
        private readonly ICategoryService _categoryService;
-        readonly ILogger <CategoryController> _logger;
-        public CategoryController(ICategoryService categoryService)
+       //private  readonly ILogger <CategoryController> _logger;
+        public CategoryController(ICategoryService categoryService,ILogger<CategoryController> logger)
         {
+            // _logger = logger;
             _categoryService = categoryService;
         }
     /// <summary>
@@ -20,7 +21,7 @@ namespace Order_Delicious.Controllers
     /// </summary>
     /// <param name="createCmd"></param>
     /// <param name="cancellationToken"></param>
-    /// <returns>OK</returns>
+    /// <returns></returns>
   
       [HttpPost]
       [ProducesResponseType(StatusCodes.Status201Created)]
@@ -28,10 +29,10 @@ namespace Order_Delicious.Controllers
       [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Create(CreateCategory createCmd,CancellationToken cancellationToken)
         {
-            if(!ModelState.IsValid) return BadRequest(ModelState);
+         //   _logger.LogInformation("Creating Category");
             var result = await _categoryService.Create(createCmd, cancellationToken);
             if(!result.IsSuccess) return BadRequest(result.ErrorMessage); 
-            return Created();
+            return CreatedAtAction(nameof(GetById),new {Id = result.Value}, result.Value);
         }
      /// <summary>
      /// API For Getting Categories In Pages 

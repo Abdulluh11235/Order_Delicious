@@ -14,8 +14,6 @@ public interface ICategoryService
     Task<Result<CategoryDto?>> GetById(int id,
         CancellationToken cancellationToken = default);
 
-    Task<Result<IEnumerable<CategoryDto>>> FindCategoryPaged(Expression<Func<Category, bool>> predicate,
-        int pageNumber,int pageSize,CancellationToken cancellationToken=default);
     Task<Result<int>> Update(int id,UpdateCategory updateCategory,CancellationToken cancellationToken = default);
     public Task<Result<int>> RemoveRange(IEnumerable<int> ids,
         CancellationToken cancellationToken = default);

@@ -5,9 +5,9 @@ namespace Domain.Interfaces.Repository;
 public interface IRepository<T> where T : class
 {
     void Add(T entity);
-    Task<IEnumerable<T>> GetEntityPaged(int pageNumber, int pageSize);
+    Task<IEnumerable<T>> GetEntityPaged(int pageNumber, int pageSize,CancellationToken cancellationToken);
     Task<T?> GetFirstOrDefault(Expression<Func<T,bool>> condition);
-    public Task<IEnumerable<T>> FindEntityPaged(Expression<Func<T, bool>> predicate, int pageNumber, int pageSize);
+    public Task<IEnumerable<T>> FindEntities(Expression<Func<T, bool>> predicate,CancellationToken cancellationToken);
     public Task<int> Count();
     public void Update(T entity);
     Task RemoveRange(IEnumerable<int> ids);

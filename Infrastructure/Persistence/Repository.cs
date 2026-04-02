@@ -21,22 +21,22 @@ public abstract class Repository<T>:IRepository<T> where T :class,IIdentifiable
         DbSet.Add(entity);
     }
 
-    public virtual async Task<IEnumerable<T>> GetEntityPaged(int pageNumber, int pageSize)
+    public virtual async Task<IEnumerable<T>> GetEntityPaged(int pageNumber, int pageSize,CancellationToken cancellationToken)
     { 
         int offset = (pageNumber - 1) * pageSize;
       
-        return await DbSet.Skip(offset).Take(pageSize).ToListAsync();
+        return await DbSet.Skip(offset).Take(pageSize).ToListAsync(cancellationToken);
     }
 
     public virtual async Task<T?> GetFirstOrDefault(Expression<Func<T, bool>> condition)
     {
         return await DbSet.FirstOrDefaultAsync(condition);  
     }
-
-
-    public virtual async Task<IEnumerable<T>> FindEntityPaged(Expression<Func<T, bool>> predicate, int pageNumber, int pageSize)
+    
+    public virtual async Task<IEnumerable<T>> FindEntities(Expression<Func<T, bool>> predicate
+        ,CancellationToken cancellationToken)
     {
-        return await DbSet.Where(predicate).Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
+        return await DbSet.Where(predicate).ToListAsync(cancellationToken);
     }
 
     public async Task<int> Count()
