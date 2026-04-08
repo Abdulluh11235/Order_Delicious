@@ -3,11 +3,11 @@ using System.ComponentModel.DataAnnotations;
 namespace Application.Commands;
 
 public record CreateImage(
-[Url]
+[Url,Required]
 [StringLength(100)]
 string Url,
-[StringLength(40)]
+[StringLength(40),Required]
 string Title,
-[StringLength(40)]
+[StringLength(40),Required]
 string AltText 
 );

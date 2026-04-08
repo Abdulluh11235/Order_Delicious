@@ -4,6 +4,7 @@ using System.Net.Mime;
 namespace Application.Commands;
 
 public record CreateCategory(
-[StringLength(40)]
+[StringLength(40),Required]
 string Name,
+[Required]
 CreateImage Image );
