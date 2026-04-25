@@ -1,10 +1,14 @@
 using Application.Commands;
 using Application.Services.Interfaces;
+using Common;
 using Domain;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Build.Framework;
 
 namespace Order_Delicious.Controllers
 {
+    [Authorize] 
     [Route("api/v1/categories")]
     [ApiController]
     public class CategoryController : ControllerBase

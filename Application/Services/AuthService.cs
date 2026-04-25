@@ -1,11 +1,13 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using Application.Services.Interfaces;
 using Common;
 using Domain;
 using Domain.Entities;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 namespace Application.Services;
@@ -37,7 +39,12 @@ public class AuthService:IAuthService
             FirstName = model.FirstName,
             LastName = model.LastName,
         };
+        
+        
+        var refreshToken = GenerateRefreshToken();
+        user.RefreshTokens.Add(refreshToken);
         var res=await _userManger.CreateAsync(user, model.Password);
+
         if (!res.Succeeded)
         {
             var errors = string.Join(',', res.Errors.Select(x => x.Description));
@@ -46,12 +53,15 @@ public class AuthService:IAuthService
         
         await _userManger.AddToRoleAsync(user,Roles.User);
         var token = await CreateJwtToken(user);
+        
+ 
         var val= new AuthModel()
         {
             Email = user.Email,
-            ExpiresOn = token.ValidTo,
             Roles = new List<string>() { Roles.User },
             Token = new JwtSecurityTokenHandler().WriteToken(token),
+            RefreshToken = refreshToken.Token,
+            RefreshTokenExpiresOn = refreshToken.ExpiresOn,
             Username = user.UserName
         };
         return new Result<AuthModel>() {Value = val};
@@ -73,9 +83,25 @@ public class AuthService:IAuthService
             Email = user.Email!,
             Token = new JwtSecurityTokenHandler().WriteToken(token),
             Username = user.UserName!,
-            ExpiresOn = token.ValidTo,
             Roles = await _userManger.GetRolesAsync(user)
         };
+        
+        if (user.RefreshTokens.Any(t=>t.IsActive))
+        {
+            var activeRefreshToken = user.RefreshTokens.First(t=>t.IsActive);
+            authModel.RefreshToken = activeRefreshToken.Token;
+            authModel.RefreshTokenExpiresOn = activeRefreshToken.ExpiresOn;
+        }
+        else
+        {
+          var refreshToken = GenerateRefreshToken();
+          authModel.RefreshToken = refreshToken.Token;
+          authModel.RefreshTokenExpiresOn = refreshToken.ExpiresOn;
+          user.RefreshTokens.Add(refreshToken);
+          
+          await _userManger.UpdateAsync(user);
+        }
+       
         return new Result<AuthModel>() {Value = authModel};
     }
 
@@ -97,11 +123,12 @@ public class AuthService:IAuthService
     }
 
 
+
     private async Task<JwtSecurityToken> CreateJwtToken(ApplicationUser user)
     {
         var userClaims = await _userManger.GetClaimsAsync(user);
         var roles = await _userManger.GetRolesAsync(user);
-        var roleClaims = roles.Select(role => new Claim(ClaimTypes.Role, role)).ToList();
+        var roleClaims = roles.Select(role => new Claim("roles", role)).ToList();
         var claims = new[]
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.UserName!),
@@ -117,11 +144,71 @@ public class AuthService:IAuthService
             issuer: _configuration["Jwt:Issuer"],
             audience: _configuration["Jwt:Audience"],
             claims: claims,
-            expires: DateTime.UtcNow.AddDays(Convert.ToDouble(_configuration["Jwt:DurationInDays"])),
+            expires: DateTime.UtcNow.AddMinutes(Convert.ToDouble(_configuration["Jwt:DurationInMinutes"])),
             signingCredentials: signingCredentials
         );
         
         return jwtSecurityToken;
     }
 
+    private RefreshToken GenerateRefreshToken()
+    {
+     var randNumber = RandomNumberGenerator.GetBytes(32);
+     return new RefreshToken()
+     {
+        Token =Convert.ToBase64String(randNumber),
+        ExpiresOn = DateTime.UtcNow.AddDays(10),
+        CreatedOn = DateTime.UtcNow,    
+     };
+    }
+    public async Task<Result<AuthModel>> RefreshToken(string token)
+    {
+        var authModel = new AuthModel();
+         var user = await _userManger.Users.SingleOrDefaultAsync(u=>u.RefreshTokens.Any(t => t.Token == token));
+        if (user is null)
+        {
+            return new Result<AuthModel>(false){ ErrorMessage = "Invalid Token" };
+        }
+        var refreshToken = user.RefreshTokens.Single(t=>t.Token == token);
+       
+        if(!refreshToken.IsActive)
+        {
+            return new Result<AuthModel>(false){ ErrorMessage = "Inactive Token" };
+        }
+        refreshToken.RevokedOn = DateTime.UtcNow;
+        
+        var newRefreshToken = GenerateRefreshToken();
+        user.RefreshTokens.Add(newRefreshToken);
+        await _userManger.UpdateAsync(user);
+        
+        var jwtSecurityToken = await CreateJwtToken(user);
+        
+        authModel.Token = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
+        authModel.Email = user.Email;
+        authModel.Username = user.UserName;
+        authModel.Roles = (await _userManger.GetRolesAsync(user) ).ToList();
+        authModel.RefreshToken = newRefreshToken.Token;
+        authModel.RefreshTokenExpiresOn = newRefreshToken.ExpiresOn;
+
+        return new Result<AuthModel>(true){ Value = authModel};
+    }
+
+    public async Task<Result<string>> RevokeToken(string token)
+    {
+        var authModel = new AuthModel();
+        var user = await _userManger.Users.SingleOrDefaultAsync(u=>u.RefreshTokens.Any(t => t.Token == token));
+        if (user is null)
+            return new Result<string>(false){ ErrorMessage = "Invalid Token" };
+        
+        var refreshToken = user.RefreshTokens.Single(t=>t.Token == token);
+       
+        if(!refreshToken.IsActive)
+            return new Result<string>(false){ ErrorMessage = "Inactive Token" };
+
+        refreshToken.RevokedOn = DateTime.UtcNow;
+        
+        await _userManger.UpdateAsync(user);
+        
+        return new Result<string>(true){ Value = ""};
+    }
 }
