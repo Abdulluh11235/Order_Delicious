@@ -51,6 +51,16 @@ builder.Services.AddSingleton<IMapper>(provider =>
 #endregion
 
 
+
+var jwtIssuer = builder.Configuration["JWT:Issuer"];
+var jwtAudience = builder.Configuration["JWT:Audience"];
+var jwtKey = builder.Configuration["JWT:Key"];
+
+if (string.IsNullOrWhiteSpace(jwtKey))
+{
+    throw new InvalidOperationException("JWT:Key is not configured. Set it in appsettings.json or environment variables.");
+}
+
 builder.Services.AddAuthentication(o =>
     {
         o.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -66,9 +76,9 @@ builder.Services.AddAuthentication(o =>
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["JWT:Issuer"],
-            ValidAudience = builder.Configuration["JWT:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"])),
+            ValidIssuer = jwtIssuer,
+            ValidAudience = jwtAudience,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
             ClockSkew = TimeSpan.Zero
         };
     });
@@ -87,6 +97,7 @@ app.UseHttpsRedirection();
 
 app.UseRouting();
 app.UseAuthentication();
+
 app.UseAuthorization();
 
 app.MapControllers();

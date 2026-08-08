@@ -6,7 +6,7 @@ public record ImageDto(
  [MinLength(1)]
 int Id ,
 [Url]
-[StringLength(100)]
+[StringLength(400)]
  string Url,
 [StringLength(40)]
 string Title ,

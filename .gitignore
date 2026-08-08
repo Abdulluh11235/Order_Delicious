@@ -1,0 +1,58 @@
+# Build artifacts
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+artifacts/
+
+# Visual Studio / VS Code / Rider
+.vs/
+.vscode/
+.idea/
+*.sln.iml
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.dbmdl
+*.jfm
+*.DotSettings.user
+*.DotSettings
+_ReSharper*/
+
+# NuGet / package caches
+packages/
+*.nupkg
+*.snupkg
+
+# Test output
+TestResults/
+coverage/
+*.coverage
+*.coveragexml
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+*.cache
+*.pid
+*.swp
+Thumbs.db
+.DS_Store
+
+# Local secrets and environment files
+appsettings.Development.json
+appsettings.Local.json
+secrets.json
+*.pem
+*.pfx
+*.key
+.env
+.env.*
+*.local.json
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3

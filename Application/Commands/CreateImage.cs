@@ -4,7 +4,7 @@ namespace Application.Commands;
 
 public record CreateImage(
 [Url,Required]
-[StringLength(100)]
+[StringLength(400)]
 string Url,
 [StringLength(40),Required]
 string Title,

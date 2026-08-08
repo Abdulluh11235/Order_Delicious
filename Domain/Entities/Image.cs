@@ -8,7 +8,7 @@ public class Image:IIdentifiable
     [MinLength(1)]
     public int Id { get; set; }
     [Url]
-    [StringLength(100)]
+    [StringLength(400)]
     public string Url { get; set; } = null!;
     [StringLength(40)]
     public string Title { get; set; } = null!;
