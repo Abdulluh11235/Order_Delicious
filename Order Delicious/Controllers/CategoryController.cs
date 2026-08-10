@@ -8,7 +8,7 @@ using Microsoft.Build.Framework;
 
 namespace Order_Delicious.Controllers
 {
-   // [Authorize] 
+    [Authorize] 
     [Route("api/v1/categories")]
     [ApiController]
     public class CategoryController : ControllerBase

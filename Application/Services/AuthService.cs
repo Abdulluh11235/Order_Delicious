@@ -55,15 +55,15 @@ public class AuthService:IAuthService
         var token = await CreateJwtToken(user);
         
  
-        var val= new AuthModel()
-        {
-            Email = user.Email,
-            Roles = new List<string>() { Roles.User },
-            Token = new JwtSecurityTokenHandler().WriteToken(token),
-            RefreshToken = refreshToken.Token,
-            RefreshTokenExpiresOn = refreshToken.ExpiresOn,
-            Username = user.UserName
-        };
+            var val= new AuthModel()
+            {
+                Email = user.Email,
+                Roles = new List<string>() { Roles.User },
+                Token = new JwtSecurityTokenHandler().WriteToken(token),
+                RefreshToken = refreshToken.Token,
+                RefreshTokenExpiresOn = refreshToken.ExpiresOn,
+                Username = user.UserName
+            };
         return new Result<AuthModel>() {Value = val};
     }
 
@@ -136,19 +136,34 @@ public class AuthService:IAuthService
             new Claim(JwtRegisteredClaimNames.Email, user.Email!),
             new Claim("uid", user.Id)
         }.Union(userClaims).Union(roleClaims);
-     
-        var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
-        var signingCredentials = new SigningCredentials(symmetricSecurityKey,SecurityAlgorithms.HmacSha256);
+
+        var secret = GetJwtConfigValue("Key");
+        var issuer = GetJwtConfigValue("Issuer");
+        var audience = GetJwtConfigValue("Audience");
+        var durationInMinutes = GetJwtConfigValue("DurationInMinutes");
+
+        var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
+        var signingCredentials = new SigningCredentials(symmetricSecurityKey, SecurityAlgorithms.HmacSha256);
 
         var jwtSecurityToken = new JwtSecurityToken(
-            issuer: _configuration["Jwt:Issuer"],
-            audience: _configuration["Jwt:Audience"],
+            issuer: issuer,
+            audience: audience,
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(Convert.ToDouble(_configuration["Jwt:DurationInMinutes"])),
+            expires: DateTime.UtcNow.AddMinutes(Convert.ToDouble(durationInMinutes)),
             signingCredentials: signingCredentials
         );
         
         return jwtSecurityToken;
+    }
+
+    private string GetJwtConfigValue(string key)
+    {
+        var value = _configuration[$"JWT:{key}"];
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            throw new InvalidOperationException($"Missing JWT configuration: 'JWT:{key}'. Add it in appsettings.json.");
+        }
+        return value;
     }
 
     private RefreshToken GenerateRefreshToken()
